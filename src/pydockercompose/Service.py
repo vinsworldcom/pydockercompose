@@ -6,7 +6,9 @@ class Service:
     def __init__(self, container_name: str = "", image: str = "", build: str = "", restart: str = "", ports: list = [],
                  networks: list = [], volumes: list = [],
                  environments: list = [], depends_on: list = [], entrypoint: str = "", command: str = "", links=[],
-                 network_mode: str = ""):
+                 network_mode: str = "",
+                 privileged: bool = False,
+                 hostname: str = ""):
         """
         :param container_name: The name of the container.
         :param image: The image of the container to build from image. Example: image = "alpine:latest"
@@ -21,6 +23,8 @@ class Service:
         :param entrypoint: Override the default entrypoint. Example: entrypoint = "/code/entrypoint.sh"
         :param links: List of services names to link with. Example: links = ["db:database", "redis"]
         :param network_mode: Network mode. Example: network_mode = "bridge"
+        :param privileged: Privileged. Example: privileged = True
+        :param hostname: Hostname. Example: hostname = "myhost"
         """
         self._container_name = container_name
         self._image = image
@@ -34,6 +38,8 @@ class Service:
         self._command = command
         self._entrypoint = entrypoint
         self._links = links
+        self._privileged = privileged
+        self._hostname = hostname
         self._ulimits = {}
         self._network_mode = network_mode
         self._service = {}
@@ -43,6 +49,12 @@ class Service:
 
     def set_image(self, image: str = ""):
         self._image = image
+
+    def set_privileged(self, privileged: bool = False):
+        self._privileged = privileged
+
+    def set_hostname(self, hostname: str = ""):
+        self._hostname = hostname
 
     def set_build(self, build: str = ""):
         self._build = build
@@ -111,9 +123,11 @@ class Service:
             "ulimits": self._ulimits,
             "links": self._links,
             "depends_on": self._depends_on,
-            "command": self._commands,
+            "command": self._command,
             "entrypoint": self._entrypoint,
             "network_mode": self._network_mode,
+            "privileged": self._privileged,
+            "hostname": self._hostname,
         }
         filtered = {k: v for k, v in self._service.items() if v not in (None, [], "", {})}
         self._service.clear()
